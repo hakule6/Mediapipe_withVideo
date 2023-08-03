@@ -84,22 +84,19 @@ public class PoseTracking : MonoBehaviour
 
         var config = CalculatorGraphConfig.Parser.ParseFromTextFormat(_configAsset.text);
 
-        // yield return GpuManager.Initialize();
+        yield return GpuManager.Initialize();
 
-        // if (!GpuManager.IsInitialized)
-        // {
-        //     throw new Exception("Failed to initialize GPU resources");
-        // }
+        if (!GpuManager.IsInitialized)
+        {
+            throw new Exception("Failed to initialize GPU resources");
+        }
 
-
-        _graph = new CalculatorGraph(_configAsset.text);
-
-        // using (var validatedGraphConfig = new ValidatedGraphConfig())
-        // {
-        //     validatedGraphConfig.Initialize(config).AssertOk();
-        //     _graph = new CalculatorGraph(validatedGraphConfig.Config());
-        //     _graph.SetGpuResources(GpuManager.GpuResources).AssertOk();
-        // }
+        using (var validatedGraphConfig = new ValidatedGraphConfig())
+        {
+            validatedGraphConfig.Initialize(config).AssertOk();
+            _graph = new CalculatorGraph(validatedGraphConfig.Config());
+            _graph.SetGpuResources(GpuManager.GpuResources).AssertOk();
+        }
 
         _outputVideoStream = new OutputStream<ImageFramePacket, ImageFrame>(_graph, "output_video");
         _poseLandmarksStream = new OutputStream<NormalizedLandmarkListPacket, NormalizedLandmarkList>(_graph, "pose_landmarks");
@@ -131,30 +128,16 @@ public class PoseTracking : MonoBehaviour
         //        _outputTexture.Apply();
         //    }
         //}
-        // if (_poseLandmarksStream.TryGetNext(out var poseLandmarks))
-        // {
-        //     if (poseLandmarks != null)
-        //     {
-        //         for (int i = 1; i <= 32; i++)
-        //         {
-        //             _bodyLandmarks = _screenRect.GetPoint(poseLandmarks.Landmark[i]);
-        //             Debug.Log(_bodyLandmarks);
-        //         }
-        //     }
-        // }
-
-        if (_poseLandmarkStream.TryGetNext(out var poseLandmarks))
+        if (_poseLandmarksStream.TryGetNext(out var poseLandmarks))
         {
-            
             if (poseLandmarks != null)
             {
-                _PoseLandmarksAnnotationController.DrawNow(poseLandmarks);
-
+                for (int i = 1; i <= 32; i++)
+                {
+                    _bodyLandmarks = _screenRect.GetPoint(poseLandmarks.Landmark[i]);
+                    Debug.Log(_bodyLandmarks);
+                }
             }
-        }
-        else
-        {
-             //_PoseLandmarksAnnotationController.DrawNow(null);
         }
     }
 
