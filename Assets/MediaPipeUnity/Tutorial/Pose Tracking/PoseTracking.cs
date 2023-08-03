@@ -43,6 +43,8 @@ public class PoseTracking : MonoBehaviour
     private static bool _IsFirst = true;
     private Vector3 _bodyLandmarks;
 
+    [SerializeField] RawImage _targetTexture;
+
     private IEnumerator Start()
     {
         if (WebCamTexture.devices.Length == 0)
@@ -61,6 +63,8 @@ public class PoseTracking : MonoBehaviour
         _webCamTexture.Play();
 
         yield return new WaitUntil(() => _webCamTexture.width > 16);
+
+        _targetTexture.texture = _webCamTexture;
 
         _screen.rectTransform.sizeDelta = new Vector2(_width, _height);
 
@@ -116,14 +120,14 @@ public class PoseTracking : MonoBehaviour
         _graph.AddPacketToInputStream("input_video", new ImageFramePacket(imageFrame, new Timestamp(currentTimestamp))).AssertOk();
 
 
-        if (_outputVideoStream.TryGetNext(out var outputVideo))
-        {
-            if (outputVideo.TryReadPixelData(_outputPixelData))
-            {
-                _outputTexture.SetPixels32(_outputPixelData);
-                _outputTexture.Apply();
-            }
-        }
+        //if (_outputVideoStream.TryGetNext(out var outputVideo))
+        //{
+        //    if (outputVideo.TryReadPixelData(_outputPixelData))
+        //    {
+        //        _outputTexture.SetPixels32(_outputPixelData);
+        //        _outputTexture.Apply();
+        //    }
+        //}
         if (_poseLandmarksStream.TryGetNext(out var poseLandmarks))
         {
             if (poseLandmarks != null)
